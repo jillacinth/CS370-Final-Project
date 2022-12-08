@@ -6,24 +6,23 @@ Midterm Project Proposal
 
 import pandas as pd
 
-data = pd.read_csv(r"C:\Users\jill3\Documents\Junior Year\Fall 2022\CS 370\project\pokemon_stats.csv")
+pokemon_list = pd.read_csv(r'pokemon.csv')
 
-names = data['Pokemon'].tolist()
-hp = data['HP'].tolist()
-at = data['Attack'].tolist()
-defe = data['Defense'].tolist()
-spAt = data['Special Attack'].tolist()
-spDef = data['Special Defense'].tolist()
-sd = data['Speed'].tolist()
-total_score = data['Total'].tolist()
+names = pokemon_list['Name'].tolist()
+hp = pokemon_list['HP'].tolist()
+at = pokemon_list['Attack'].tolist()
+defe = pokemon_list['Defense'].tolist()
+spAt = pokemon_list['Sp. Atk'].tolist()
+spDef = pokemon_list['Sp. Def'].tolist()
+sd = pokemon_list['Speed'].tolist()
 
-av_hp = (sum(hp))/151
-av_at = (sum(at))/151
-av_def = (sum(defe))/151
-av_spAt = (sum(spAt))/151
-av_spDef = (sum(spDef))/151
-av_sd = (sum(sd))/151
-av_score = (sum(total_score))/151
+av_hp = (sum(hp))/1190
+av_at = (sum(at))/1190
+av_def = (sum(defe))/1190
+av_spAt = (sum(spAt))/1190
+av_spDef = (sum(spDef))/1190
+av_sd = (sum(sd))/1190
+av_score = (sum(hp)+sum(at)+sum(defe)+sum(spAt)+sum(spDef)+sum(sd))/1190
 
 def betterOpp(user):
     if at[names.index(user)] < av_at:
@@ -34,8 +33,8 @@ def betterOpp(user):
         return names[search_higher(spDef, spAt[names.index(user)])]
     elif spDef[names.index(user)] < av_spDef:
         return names[search_higher(spAt, spDef[names.index(user)])]
-    else:
-        return names[search_higher(total_score, total_score[names.index(user)])]
+    #else:
+        #return names[search_higher(total_score, total_score[names.index(user)])]
 
 
 def search_higher(list, num):
@@ -50,7 +49,7 @@ def search_higher(list, num):
 
 print(names)
 user = input("What Gen 1 Pokemon would you like to use? ")
-print("Your pokemon: " + str(user) + "\nStats:\nHP = " + str(hp[names.index(user)])+ "\nAttack = " + str(at[names.index(user)]) + "\nDefense = " + str(defe[names.index(user)]) + "\nSpecial Attack = " + str(spAt[names.index(user)]) + "\nSpecial Defense = " + str(spDef[names.index(user)]) + "\nSpeed = " + str(sd[names.index(user)]) + "\nTotal = " + str(total_score[names.index(user)]))
+print("Your pokemon: " + str(user) + "\nStats:\nHP = " + str(hp[names.index(user)])+ "\nAttack = " + str(at[names.index(user)]) + "\nDefense = " + str(defe[names.index(user)]) + "\nSpecial Attack = " + str(spAt[names.index(user)]) + "\nSpecial Defense = " + str(spDef[names.index(user)]) + "\nSpeed = " + str(sd[names.index(user)]))
 better = betterOpp(user)
 print("You will lose to a " + better)
 
