@@ -24,12 +24,19 @@ av_sd = (sum(sd))/1190
 
 unique_pokemon = pd.unique(pokemon_teams[['Pokemon1','Pokemon2','Pokemon3','Pokemon4','Pokemon5','Pokemon6']].values.ravel('K'))
 
-entry_list = pokemon_teams['Entry'].tolist()
-pokemon_values = []
-for i in range(0, len(entry_list)):
-    pokemon_values.append([str(pokemon_teams.values[i, j]) for j in range(1,6)])
+entries = pokemon_teams['Entry'].tolist()
+pokemon1 = pokemon_teams['Pokemon1'].tolist()
+pokemon2 = pokemon_teams['Pokemon2'].tolist()
+pokemon3 = pokemon_teams['Pokemon3'].tolist()
+pokemon4 = pokemon_teams['Pokemon4'].tolist()
+pokemon5 = pokemon_teams['Pokemon5'].tolist()
+pokemon6 = pokemon_teams['Pokemon6'].tolist()
 
-rule = apriori(transactions= pokemon_values, min_support = 0.003, min_confidence = 0.2, min_lift = 3, min_length = 2, max_length = 2)
+pokemon_values = []
+for i in range(0, 50):
+    pokemon_values.append([str(pokemon_teams.values[i,j]) for j in range(1, 7)])
+
+rule = apriori(transactions= pokemon_values, min_support = 0.003, min_confidence = 0.2, min_lift = 3, min_length = 2, max_length = 100)
 
 output = list(rule) # returns a non-tabular output
 # putting output into a pandas dataframe
@@ -41,6 +48,23 @@ def inspect(output):
     lift       = [result[2][0][3] for result in output]
     return list(zip(lhs, rhs, support, confidence, lift))
 output_DataFrame = pd.DataFrame(inspect(output), columns = ['Left_Hand_Side', 'Right_Hand_Side', 'Support', 'Confidence', 'Lift'])
+left_side_pk = output_DataFrame['Left_Hand_Side'].tolist()
+right_side_pk = output_DataFrame['Right_Hand_Side'].tolist()
+support_pk = output_DataFrame['Support'].tolist()
+confid_pk = output_DataFrame['Confidence'].tolist()
+lift_pk = output_DataFrame['Lift'].tolist()
+
+def expect_partner(opponent):
+    possible_partners = []
+    for pokemon in left_side_pk:
+        if pokemon == opponent:
+            index = left_side_pk.index(pokemon)
+            possible_partners.append(right_side_pk[index])
+    for pokemon in right_side_pk:
+        if pokemon == opponent:
+            index = right_side_pk.index(pokemon)
+            possible_partners.append(left_side_pk[index])
+    return possible_partners
 
 def find_opponent(pokemon1):
     advantage_index = 0
@@ -48,7 +72,7 @@ def find_opponent(pokemon1):
 
     for pokemon2 in unique_pokemon:
         temp_adv = 0
-        type_compare(pokemon1, pokemon2, pokemon_list, temp_adv)
+        type_compare(pokemon1, pokemon2, temp_adv)
         stats_compare(pokemon1, pokemon2, temp_adv)
         if temp_adv > highest_adv:
             advantage_index = unique_pokemon.index(pokemon2)
@@ -56,34 +80,27 @@ def find_opponent(pokemon1):
     
     return unique_pokemon[advantage_index]
 
-def expect_partner(opponent):
-    possible_partners = output_DataFrame['Right_Hand_Side'].tolist()
-    for pokemon in output_DataFrame['Left_Hand_Side']:
-        if pokemon == opponent:
-            confidence = 
-
-
 def stats_compare(pokemon1, pokemon2, advantage_index):
-    pokemon_index1 = pokemon_list['Name'].index(pokemon1)
-    pokemon_index2 = pokemon_list['Name'].index(pokemon2)
+    pokemon_index1 = names.index(pokemon1)
+    pokemon_index2 = names.index(pokemon2)
 
-    if at[names[pokemon_index1]] < av_at:
-        if defe[names[pokemon_index2]] > av_def:
+    if at[pokemon_index1] < av_at:
+        if defe[pokemon_index2] > av_def:
             advantage_index += 1
-    elif defe[names[pokemon_index1]] < av_def:
-        if at[names[pokemon_index2]] > av_at:
+    elif defe[pokemon_index1] < av_def:
+        if at[pokemon_index2] > av_at:
             advantage_index += 1
-    elif spAt[names[pokemon_index1]] < av_spAt:
-        if spDef[names[pokemon_index2]] > av_spDef:
+    elif spAt[pokemon_index1] < av_spAt:
+        if spDef[pokemon_index2] > av_spDef:
             advantage_index += 1
-    elif spDef[names[pokemon_index1]] < av_spDef:
-        if spAt[names[pokemon_index2]] > av_spAt:
+    elif spDef[pokemon_index1] < av_spDef:
+        if spAt[pokemon_index2] > av_spAt:
             advantage_index += 1
 
 
 def type_compare(pokemon1, pokemon2, advantage_index):
-    pokemon_index1 = pokemon_list['Name'].index(pokemon1)
-    pokemon_index2 = pokemon_list['Name'].index(pokemon2)
+    pokemon_index1 = names.index(pokemon1)
+    pokemon_index2 = names.index(pokemon2)
 
     pk_type1 = pokemon_list['Type1'].tolist()
     pk_type2 = pokemon_list['Type2'].tolist()
@@ -280,3 +297,9 @@ def type_compare(pokemon1, pokemon2, advantage_index):
         if pk_type1[pokemon_index2]=='Steel' or pk_type2[pokemon_index2]=='Steel':
             if pk_type1[pokemon_index1] != 'Fighting' or pk_type2[pokemon_index1]!= 'Fighting' or pk_type1[pokemon_index1] != 'Ground' or pk_type2[pokemon_index1]!= 'Ground' or pk_type1[pokemon_index1] != 'Fire' or pk_type2[pokemon_index1]!= 'Fire':
                 advantage_index += 1
+
+
+print(find_opponent('Dragonite'))
+#print(output_DataFrame)
+print(expect_partner(find_opponent('Dragonite')))
+print(expect_partner('Zacian'))
