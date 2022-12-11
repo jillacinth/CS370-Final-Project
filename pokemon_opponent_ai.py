@@ -56,14 +56,14 @@ lift_pk = output_DataFrame['Lift'].tolist()
 
 def expect_partner(opponent):
     possible_partners = []
-    for pokemon in left_side_pk:
-        if pokemon == opponent:
-            index = left_side_pk.index(pokemon)
-            possible_partners.append(right_side_pk[index])
-    for pokemon in right_side_pk:
-        if pokemon == opponent:
-            index = right_side_pk.index(pokemon)
-            possible_partners.append(left_side_pk[index])
+
+    for i in range(0,len(left_side_pk)):
+        if left_side_pk[i] == opponent:
+            if right_side_pk[i] not in possible_partners:
+                possible_partners.append(right_side_pk[i])
+        if right_side_pk[i] == opponent:
+            if left_side_pk[i] not in possible_partners:
+                possible_partners.append(left_side_pk[i])
     return possible_partners
 
 def find_opponent(pokemon1):
@@ -79,6 +79,14 @@ def find_opponent(pokemon1):
             highest_adv = temp_adv
     
     return unique_pokemon[advantage_index]
+
+def find_your_teammates(team):
+    possible_team = []
+    for pokemon in team:
+        if find_opponent(pokemon) not in possible_team:
+            possible_team.append(find_opponent(pokemon))
+    return possible_team
+
 
 def stats_compare(pokemon1, pokemon2, advantage_index):
     pokemon_index1 = names.index(pokemon1)
@@ -299,7 +307,6 @@ def type_compare(pokemon1, pokemon2, advantage_index):
                 advantage_index += 1
 
 
-print(find_opponent('Dragonite'))
-#print(output_DataFrame)
-print(expect_partner(find_opponent('Dragonite')))
-print(expect_partner('Zacian'))
+your_pokemon = str(input("Enter what Pokemon you'd like to use: "))
+print("Your best opponent would be a " + find_opponent(your_pokemon) + ", which is likely to be paired with the following \n" + str(expect_partner(find_opponent(your_pokemon))))
+print("You should pick from the following to combat these Pokemon: \n" + str(find_your_teammates(expect_partner(find_opponent(your_pokemon)))))
