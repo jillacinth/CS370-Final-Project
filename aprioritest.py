@@ -3,6 +3,7 @@ import pandas as pd
 #from mlxtend.frequent_patterns import apriori, association_rules
 from apyori import apriori
 
+#file for debugging the apriori algorithm
 pokemon_list = pd.read_csv(r'pokemon.csv')
 pokemon_teams = pd.read_csv(r'pokemon_teams.csv')
 

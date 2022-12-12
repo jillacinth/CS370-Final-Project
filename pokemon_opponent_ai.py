@@ -22,7 +22,7 @@ av_spDef = (sum(spDef))/1190
 av_sd = (sum(sd))/1190
 #av_score = (sum(hp)+sum(at)+sum(defe)+sum(spAt)+sum(spDef)+sum(sd))/1190
 
-unique_pokemon = pd.unique(pokemon_teams[['Pokemon1','Pokemon2','Pokemon3','Pokemon4','Pokemon5','Pokemon6']].values.ravel('K'))
+#unique_pokemon = pd.unique(pokemon_teams[['Pokemon1','Pokemon2','Pokemon3','Pokemon4','Pokemon5','Pokemon6']].values.ravel('K'))
 
 entries = pokemon_teams['Entry'].tolist()
 pokemon1 = pokemon_teams['Pokemon1'].tolist()
@@ -47,17 +47,21 @@ def inspect(output):
     confidence = [result[2][0][2] for result in output]
     lift       = [result[2][0][3] for result in output]
     return list(zip(lhs, rhs, support, confidence, lift))
-output_DataFrame = pd.DataFrame(inspect(output), columns = ['Left_Hand_Side', 'Right_Hand_Side', 'Support', 'Confidence', 'Lift'])
+output_DataFrame0 = pd.DataFrame(inspect(output), columns = ['Left_Hand_Side', 'Right_Hand_Side', 'Support', 'Confidence', 'Lift'])
+output_DataFrame = output_DataFrame0.sort_values(by='Support', ascending=False)
 left_side_pk = output_DataFrame['Left_Hand_Side'].tolist()
 right_side_pk = output_DataFrame['Right_Hand_Side'].tolist()
 support_pk = output_DataFrame['Support'].tolist()
 confid_pk = output_DataFrame['Confidence'].tolist()
 lift_pk = output_DataFrame['Lift'].tolist()
+unique_pokemon = pd.unique(output_DataFrame[['Left_Hand_Side','Right_Hand_Side']].values.ravel('K'))
 
 def expect_partner(opponent):
     possible_partners = []
 
     for i in range(0,len(left_side_pk)):
+        if len(possible_partners) == 5:
+            break
         if left_side_pk[i] == opponent:
             if right_side_pk[i] not in possible_partners:
                 possible_partners.append(right_side_pk[i])
@@ -69,14 +73,13 @@ def expect_partner(opponent):
 def find_opponent(pokemon1):
     advantage_index = 0
     highest_adv = 0
-
-    for pokemon2 in unique_pokemon:
-        temp_adv = 0
-        type_compare(pokemon1, pokemon2, temp_adv)
-        stats_compare(pokemon1, pokemon2, temp_adv)
+    pk_index = 0
+    for pokemon in unique_pokemon:
+        temp_adv = type_compare(pokemon1, pokemon, 0) + stats_compare(pokemon1, pokemon, 0)
         if temp_adv > highest_adv:
-            advantage_index = unique_pokemon.index(pokemon2)
+            advantage_index = pk_index
             highest_adv = temp_adv
+        pk_index += 1
     
     return unique_pokemon[advantage_index]
 
@@ -104,6 +107,7 @@ def stats_compare(pokemon1, pokemon2, advantage_index):
     elif spDef[pokemon_index1] < av_spDef:
         if spAt[pokemon_index2] > av_spAt:
             advantage_index += 1
+    return advantage_index
 
 
 def type_compare(pokemon1, pokemon2, advantage_index):
@@ -305,8 +309,10 @@ def type_compare(pokemon1, pokemon2, advantage_index):
         if pk_type1[pokemon_index2]=='Steel' or pk_type2[pokemon_index2]=='Steel':
             if pk_type1[pokemon_index1] != 'Fighting' or pk_type2[pokemon_index1]!= 'Fighting' or pk_type1[pokemon_index1] != 'Ground' or pk_type2[pokemon_index1]!= 'Ground' or pk_type1[pokemon_index1] != 'Fire' or pk_type2[pokemon_index1]!= 'Fire':
                 advantage_index += 1
+    return advantage_index
 
 
 your_pokemon = str(input("Enter what Pokemon you'd like to use: "))
 print("Your best opponent would be a " + find_opponent(your_pokemon) + ", which is likely to be paired with the following \n" + str(expect_partner(find_opponent(your_pokemon))))
 print("You should pick from the following to combat these Pokemon: \n" + str(find_your_teammates(expect_partner(find_opponent(your_pokemon)))))
+
